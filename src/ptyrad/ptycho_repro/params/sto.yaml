@@ -1,0 +1,89 @@
+# SrTiO₃ [001] LOP Reproduction — Parameter Template
+# Based on Zenodo 7034879 (LiberTEM SrTiO₃ dataset)
+#
+# Usage:
+#   from ptyrad.params.parser import load_params
+#   from ptyrad.ptycho_repro.lop import LOPOrbitalSolver
+#   solver = LOPOrbitalSolver(load_params("sto.yaml"), device="cuda")
+#   solver.reconstruct()
+
+data:
+  # To be filled by data loading script
+  measurements: null      # (N, Ny, Nx) float32
+  scan_positions: null    # (N, 2) in pm
+  probe: null             # (Ny, Nx) complex64
+  N_scan_slow: 30
+  N_scan_fast: 30
+
+init_params:
+  n_orbitals: 256
+  grid_shape: [96, 96]
+  pixel_size: 10.0          # pm
+  init_position_spread: 50.0  # pm
+  init_sigma: 25.0          # pm
+  init_amplitude: 1.0
+  dx: 0.1                   # Angstrom
+  dk: 0.1
+  random_seed: 42
+
+model_params:
+  preload_data: true
+  detector_blur_std: null
+
+  optimizer_params:
+    name: Adam
+    configs: {}
+
+  scheduler_params: null
+
+  update_params:
+    orbital_positions:
+      lr: 5.0e-3
+      start_iter: 1
+    orbital_amplitudes:
+      lr: 5.0e-3
+      start_iter: 1
+    orbital_sigmas:
+      lr: 5.0e-4
+      start_iter: 1
+    probe:
+      lr: 1.0e-4
+      start_iter: 1
+    probe_pos_shifts:
+      lr: 1.0e-4
+      start_iter: 1
+
+loss_params:
+  loss_poissn:
+    state: true
+    weight: 1.0
+    dp_pow: 1
+    eps: 1.0e-6
+  loss_single:
+    state: false
+    weight: 0
+  loss_pacbed:
+    state: false
+    weight: 0
+  loss_sparse:
+    state: false
+    weight: 0
+  loss_simlar:
+    state: false
+    weight: 0
+
+constraint_params: {}
+
+recon_params:
+  NITER: 1000
+  SAVE_ITERS: 100
+  BATCH_SIZE:
+    size: 64
+    grad_accumulation: 1
+  output_dir: output/lop_sto
+  prefix_time: true
+  prefix: ""
+  postfix: ""
+  copy_params: false
+  compiler_configs:
+    enable: false

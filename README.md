@@ -1,4 +1,8 @@
 # PtyRAD: Ptychographic Reconstruction with Automatic Differentiation
+
+> **🔬 Co-STEM-Lab 复现分支** — 本仓库是 `chiahao3/ptyrad` 的复现分支，
+> 用于复现清华大学于荣教授团队的轨道叠层成像算法。
+> Forked from [chiahao3/ptyrad](https://github.com/chiahao3/ptyrad), v1.0.0.
 ![PyPI - Version](https://img.shields.io/pypi/v/ptyrad)
 [![PyPI Downloads](https://static.pepy.tech/badge/ptyrad)](https://pepy.tech/projects/ptyrad)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/ptyrad/badges/version.svg)](https://anaconda.org/conda-forge/ptyrad)
@@ -28,6 +32,43 @@
 - Hyperparameter tuning
 - Multi-GPU reconstructions
 - JIT compilation with `torch.compile`
+
+## ptycho_repro — 论文结果复现模块
+
+`ptycho_repro` 是 PtyRAD 的扩展模块，提供轨道（orbital）表示的电子叠层成像算法，用于复现清华大学于荣教授团队的四篇论文结果：
+
+| 算法 | 论文 | 核心思想 |
+|------|------|---------|
+| **LOP** | Nature Nanotechnology 2024 | 2D 高斯轨道 + 叠层成像 |
+| **APP** | Science Advances 2022 | 自适应传播因子 + 多切片倾转校正 |
+| **nLOT** | Science Bulletin 2024 | 3D 轨道层析 + 多倾转/多离焦 |
+| **eLOP** | arXiv 2025 | 位置相关像差 + 轨道叠层 |
+
+模块结构：
+
+```
+src/ptyrad/ptycho_repro/
+├── lop/       LOPOrbitalModel + LOPOrbitalSolver
+├── app/       APPOrbitalModel  + APPOrbitalSolver
+├── nlot/      NLOTOrbitalModel + NLOTOrbitalSolver
+├── elop/      ELOPOrbitalModel + ELOPOrbitalSolver
+├── params/    YAML 参数模板
+├── save.py    保存（HDF5 + TIFF）
+└── vis.py     可视化工具
+```
+
+所有模型兼容 PtyRAD 的 `recon_loop`、`CombinedLoss`、`CombinedConstraint`，直接复用 PtyRAD 的优化循环和基础设施。
+
+快速使用：
+
+```python
+from ptyrad.params.parser import load_params
+from ptyrad.ptycho_repro.lop import LOPOrbitalSolver
+
+params = load_params("params/sto.yaml")
+solver = LOPOrbitalSolver(params, device="cuda")
+solver.reconstruct()
+```
 
 ## Recommended Tools
 We recommend using [*Miniforge*](https://conda-forge.org/download/) for Python environment management, and  
